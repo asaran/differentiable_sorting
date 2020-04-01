@@ -1,4 +1,5 @@
 from .bitonic_loops import bitonic_layer_loop, bitonic_swap_loop
+import torch
 
 try:
     # try to use autoray to provide transparent JAX/autograd support
@@ -18,8 +19,8 @@ def softmax(a, b, alpha=1, normalize=0):
             Working Paper Series 70, UT MD Anderson CancerCenter Department of Biostatistics, 
             2011. http://biostats.bepress.com/mdandersonbiostat/paper7
     """
-    return np.log(np.exp(a * alpha) + np.exp(b * alpha) - normalize) / alpha
-
+    #return np.log(np.exp(a * alpha) + np.exp(b * alpha) - normalize) / alpha
+    return torch.log(torch.exp(a * alpha) + torch.exp(b * alpha) - normalize) / alpha
 
 ### Smooth max
 def smoothmax(a, b, alpha=1):
