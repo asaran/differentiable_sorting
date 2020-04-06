@@ -7,12 +7,12 @@ def sort(x):
 	matrices = bitonic_matrices(len(x))
 	torch_input = Variable(torch.from_numpy(np.array(x)).float(), requires_grad=True)
 	sorted_input = diff_sort(matrices, torch_input)
-	print(sorted_input)
+	print('sorted_input: ',sorted_input)
 	ranking = diff_argsort(matrices, torch_input)
-	print(ranking)
+	print('ranking: ',ranking)
 
 	# differentiate the sorted array wrt input 
-	print(torch.autograd.grad(sorted_input[0], torch_input)[0])
+	print('derivative: ',torch.autograd.grad(sorted_input[0], torch_input)[0])
 
 	return sorted_input, ranking
 
@@ -24,14 +24,18 @@ def LB_div(gt,r):
 	sorted_r, ranking = sort(r)
 	#ranking = ranking + 1 #indexing with 1 instead of 0
 
-	gt = Variable(torch.from_numpy(np.array(gt)).float(), requires_grad=True)
-	r = Variable(torch.from_numpy(np.array(r)).float(), requires_grad=True)
+	#gt = Variable(torch.from_numpy(np.array(gt)).float(), requires_grad=True)
+	#r = Variable(torch.from_numpy(np.array(r)).float(), requires_grad=True)
+	sorted_r = torch.tensor(sorted_r)
+	r = torch.tensor(r)
+	r_permuted = r.index_select(0, gt)
+	print('scores permuted by GT: ',r_permuted)
 
 	penalty = 0
 	# iterate over trajectories
 	for i in range(len(r)):
 		# sorted scores, scores permuted acc to GT ranking (still non-differentiable)
-		penalty += (sorted_r[i] - r[gt[i].detach().numpy()])*i
+		penalty += (sorted_r[i] - r_permuted[i])*i
 
 	return penalty
 
@@ -45,7 +49,7 @@ if __name__ == '__main__':
 
 	# ground truth ranking of a set of trajectories
 	# ranking signifies ascending order of rewards
-	gt_ranking = [1,0,2,3]
+	gt_ranking = torch.tensor([1,0,2,3])
 	#gt_ranking = Variable(torch.from_numpy(np.array(gt_ranking)).float(), requires_grad=True)
 	print("Ground Truth Ranking: "+str(gt_ranking))
 
